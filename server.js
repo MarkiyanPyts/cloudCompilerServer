@@ -15,6 +15,9 @@ http.createServer(function(req, res){
         switch(req.method) {
             case "POST": 
                 switch(lookup) {
+                    case "compile": 
+                       result = helpers.compile(JSON.parse(stringConfig), events);
+                    break;
                     case "init": 
                        result = helpers.init(JSON.parse(stringConfig), events);
                     break;
