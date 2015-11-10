@@ -1,5 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
+var path = require('path');
+var process = require('process');
 module.exports = {
     usersList: "./users/users.json",
     init: function(config, events) {
@@ -26,7 +28,8 @@ module.exports = {
         }
     },
     cloneProcess: function(gitClonePath, userName, events) {
-        exec("git clone " + gitClonePath, {cwd: "users/" + userName}, function (error, stdout, stderr) {
+        var clonePath = path.normalize("users/" + userName);
+        exec("git clone " + gitClonePath, {cwd: clonePath}, function (error, stdout, stderr) {
             if (error === null) {
                 events.emit("operationsFinished", {
                     "message": "git clone is done at users/" + userName + " folder"
@@ -60,35 +63,61 @@ module.exports = {
     compileProcess: function(config, events) {
         var gitRepoNameStartIndex = config.gitClonePath.lastIndexOf("/"),
             gitRepoNameEndIndex = config.gitClonePath.lastIndexOf(".git"),
-            gitRepoName = config.gitClonePath.substring(gitRepoNameStartIndex + 1, gitRepoNameEndIndex - 1),
-            repoPathOnServer = "users/" + config.userName + "/" + gitRepoName,
+            gitRepoName = config.gitClonePath.substring(gitRepoNameStartIndex + 1, gitRepoNameEndIndex),
+            repoPathOnServer = path.resolve(__dirname + "/users/" + config.user + "/" + gitRepoName),
             that = this;
-        console.log("repo name:" + gitRepoName);
-        
         exec("git pull " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
             if (error === null) {
                 console.log("git pull is done");
-                that.execCustomCliCommmands(config, events, function() {
-
+                that.execCustomCliCommmands(config, events, repoPathOnServer, function(stdout) {
+                    console.log(stdout);
+                    that.pushResultsBack(config, repoPathOnServer, events);
                 });
             }else {
                 events.emit("operationsFinished", {
-                    "message": "the following error has occured: " + error
+                    "message": "the following error has occured: " + stdout + error
                 });
             }
         });
     },
-    execCustomCliCommmands: function(config, events, callback) {
+    pushResultsBack: function(config, repoPathOnServer, events) {
+        var that = this;
+        exec("git push " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+            if (error === null) {
+                console.log("git push is done");
+                that.execCustomCliCommmands(config, events, repoPathOnServer, function(stdout) {
+                    console.log(stdout);
+                    events.emit("operationsFinished", {
+                        "message": "compiled data is pushed back successfully"
+                    });
+                });
+            }else {
+                events.emit("operationsFinished", {
+                    "message": "the following error has occured: " + stdout + error
+                });
+            }
+        });
+    },
+    execCustomCliCommmands: function(config, events, repoPathOnServer, callback) {
         var gitCommands = config.cloudCommands.split(","),
             currentCommand;
-        console.log(gitCommands);
         if(gitCommands.length) {
             function execCustomCommands() {
                 currentCommand = gitCommands.shift().trim();
                 console.log("current command: " + currentCommand)
-                /*if(gitCommands.length) {
-                    execCustomCommands();
-                }*/
+                exec(currentCommand, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+                    if (error === null) {
+                        if(gitCommands.length) {
+                            execCustomCommands();
+                        }else {
+                            callback(stdout);
+                        }
+                    }else {
+                        events.emit("operationsFinished", {
+                            "message": "the following error has occured: " + error
+                        });
+                    }
+                });
             }
             execCustomCommands();
         }else {
@@ -96,22 +125,12 @@ module.exports = {
                 "message": "config.cloudCommands are empty please fill it with CLI commands separated by ','"
             });
         }
-        /*exec("git pull " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
-            if (error === null) {
-                console.log("git pull is done");
-                
-            }else {
-                events.emit("operationsFinished", {
-                    "message": error
-                });
-            }
-        });*/
     },
     checkIfUserExists: function(userName) {
         var users = JSON.parse(fs.readFileSync("./users/users.json"));
-        if(users[userName]) {console.log("Exists")
+        if(users[userName]) {
             return true;
-        }else {console.log("Not Exists")
+        }else {
             return false;
         }
     },
