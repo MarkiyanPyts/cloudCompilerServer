@@ -82,18 +82,32 @@ module.exports = {
     },
     pushResultsBack: function(config, repoPathOnServer, events) {
         var that = this;
-        exec("git push " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+        exec("git add -A", {cwd: repoPathOnServer}, function (error, stdout, stderr) {
             if (error === null) {
-                console.log("git push is done");
-                that.execCustomCliCommmands(config, events, repoPathOnServer, function(stdout) {
-                    console.log(stdout);
-                    events.emit("operationsFinished", {
-                        "message": "compiled data is pushed back successfully"
-                    });
+                exec("git commit -m \"cloud compiler server process\"", {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+                    if (error === null) {
+                        console.log('commit success: ' + stdout);
+                        exec("git push " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+                            if (error === null) {
+                                console.log(stdout);
+                                events.emit("operationsFinished", {
+                                    "message": "compiled data is pushed back successfully"
+                                });
+                            }else {
+                                events.emit("operationsFinished", {
+                                    "message": "the following error has occured: " + stdout + error
+                                });
+                            }
+                        });
+                    }else {
+                        events.emit("operationsFinished", {
+                            "message": "there is nothing new to push back error: " + stdout + error
+                        });
+                    }
                 });
             }else {
                 events.emit("operationsFinished", {
-                    "message": "the following error has occured: " + stdout + error
+                    "message": "there is nothing new to push back error: " + stdout + error
                 });
             }
         });
