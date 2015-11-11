@@ -3,7 +3,7 @@ var path = require('path');
 var helpers = require("./helpers.js");
 var EventEmitter = require("events").EventEmitter,
     events = new EventEmitter();
-http.createServer(function(req, res){
+var server = http.createServer(function(req, res){
     var lookup = path.basename(decodeURI(req.url));
     //console.log(lookup, req.method);
     var stringConfig = "";
@@ -35,3 +35,4 @@ http.createServer(function(req, res){
     });
     
 }).listen(3000, null);
+server.timeout = 320000;
