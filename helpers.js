@@ -2,6 +2,7 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
 var process = require('process');
+var rimraf = require('rimraf');
 module.exports = {
     usersList: "./users/users.json",
     init: function(config, events) {
@@ -160,6 +161,40 @@ module.exports = {
         console.log("user " + userName + ' is created');
         return true;
     },
+
+    destroyUser: function(config, events) {
+        var userExists = this.checkIfUserExists(config.user);
+        if(!userExists) {
+            events.emit("operationsFinished", {
+                "message": "User with name you have in config file does not exist, run 'init' command to create one"
+            });
+        }else {
+        //user Exists
+           var passwordIsValid = this.checkUserPassword(config.user, config.password);
+           if(passwordIsValid) {
+                console.log("user password is valid removing his folder and records");
+                var users = JSON.parse(fs.readFileSync(this.usersList));
+                delete users[config.user];
+                fs.writeFileSync(this.usersList, JSON.stringify(users, null, 4));
+                rimraf('users/' + config.user, function(error) {
+                    if(error !== null) {
+                        events.emit("operationsFinished", {
+                            "message": "error on folder deletion: " + error 
+                        });
+                    }else {
+                        events.emit("operationsFinished", {
+                            "message": "your folder and records on server is removed"
+                        });
+                    }
+                });
+           }else {
+                events.emit("operationsFinished", {
+                    "message": "The user name you used already exists but your password is unvalid, please choose another user name or use correct password"
+                });
+           }
+        }
+    },
+
     checkUserPassword: function(userName, password) {
         var users = JSON.parse(fs.readFileSync(this.usersList));
         if(users[userName] === password) {

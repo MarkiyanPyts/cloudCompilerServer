@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/DarthMarcius/cloudCompilerServer/issues"
   },
-  "homepage": "https://github.com/DarthMarcius/cloudCompilerServer#readme"
+  "homepage": "https://github.com/DarthMarcius/cloudCompilerServer#readme",
+  "dependencies": {
+    "rimraf": "^2.4.3"
+  }
 }

@@ -21,6 +21,9 @@ var server = http.createServer(function(req, res){
                     case "init": 
                        result = helpers.init(JSON.parse(stringConfig), events);
                     break;
+                    case "destroy": 
+                       result = helpers.destroyUser(JSON.parse(stringConfig), events);
+                    break;
                     default:
                     console.error("404");
                 }
