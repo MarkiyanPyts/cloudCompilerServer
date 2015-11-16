@@ -19,7 +19,7 @@ module.exports = {
            var passwordIsValid = this.checkUserPassword(config.user, config.password);
            if(passwordIsValid) {
                 console.log("user password is valid accessing his folder for git clone");
-                this.cloneProcess(config.gitClonePath, config.user, events);
+                this.cloneProcess(config, events);
            }else {
                 events.emit("operationsFinished", {
                     "message": "The user name you used already exists but your password is unvalid, please choose another user name or use correct password"
@@ -27,12 +27,15 @@ module.exports = {
            }
         }
     },
-    cloneProcess: function(gitClonePath, userName, events) {
-        var clonePath = path.normalize("users/" + userName);
+    cloneProcess: function(config, events) {
+        var clonePath = path.normalize("users/" + config.user),
+            gitClonePathSplit = config.gitClonePath.split("@"),
+            gitClonePath = gitClonePathSplit[0] + ":" + config.gitPassword + "@" + gitClonePathSplit[1]; 
+        console.log("new Clone to: ", gitClonePath)
         exec("git clone " + gitClonePath, {cwd: clonePath}, function (error, stdout, stderr) {
             if (error === null) {
                 events.emit("operationsFinished", {
-                    "message": "git clone is done at users/" + userName + " folder"
+                    "message": "git clone is done at users/" + config.user + " folder"
                 });
             }else {
                 events.emit("operationsFinished", {
