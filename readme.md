@@ -12,7 +12,7 @@
 2. Install [ruby](http://rubyinstaller.org/downloads/)
 3. Install [compass](http://compass-style.org/install/)
 
->Client side Cloud Compiler setup for this scenario is described in [cloudCompiler readme](https://github.com/DarthMarcius/cloudCompiler)
+>Client side Cloud Compiler setup is described in [cloudCompiler readme](https://github.com/DarthMarcius/cloudCompiler)
 
 ### Install steps
 1. Clone this repo to your server
