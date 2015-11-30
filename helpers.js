@@ -1,6 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
+var maxBuffer = 500 * 1024;
 //var process = process || require('process');
 var rimraf = require('rimraf');
 module.exports = {
@@ -33,7 +34,7 @@ module.exports = {
             gitClonePathSplit = config.gitClonePath.split("@"),
             gitClonePath = gitClonePathSplit[0] + ":" + config.gitPassword + "@" + gitClonePathSplit[1]; 
         console.log("new Clone to: ", gitClonePath)
-        exec("git clone " + gitClonePath, {cwd: clonePath}, function (error, stdout, stderr) {
+        exec("git clone " + gitClonePath, {cwd: clonePath, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
             if (error === null) {
                 events.emit("operationsFinished", {
                     "message": "git clone is done at users/" + config.user + " folder"
@@ -70,7 +71,7 @@ module.exports = {
             gitRepoName = config.gitClonePath.substring(gitRepoNameStartIndex + 1, gitRepoNameEndIndex),
             repoPathOnServer = path.resolve(__dirname + "/users/" + config.user + "/" + gitRepoName),
             that = this;
-        exec("git pull " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+        exec("git pull " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
             if (error === null) {
                 console.log("git pull is done");
                 that.execCustomCliCommmands(config, events, repoPathOnServer, function(stdout) {
@@ -86,12 +87,12 @@ module.exports = {
     },
     pushResultsBack: function(config, repoPathOnServer, events) {
         var that = this;
-        exec("git add -A", {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+        exec("git add -A", {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
             if (error === null) {
-                exec("git commit -m \"cloud compiler server process\"", {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+                exec("git commit -m \"cloud compiler server process\"", {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
                     if (error === null) {
                         console.log('commit success: ' + stdout);
-                        exec("git push " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+                        exec("git push " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
                             if (error === null) {
                                 console.log(stdout);
                                 events.emit("operationsFinished", {
@@ -123,7 +124,7 @@ module.exports = {
             function execCustomCommands() {
                 currentCommand = gitCommands.shift().trim();
                 console.log("current command: " + currentCommand)
-                exec(currentCommand, {cwd: repoPathOnServer}, function (error, stdout, stderr) {
+                exec(currentCommand, {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
                     if (error === null) {
                         if(gitCommands.length) {
                             execCustomCommands();
