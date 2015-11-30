@@ -1,7 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
-var process = require('process');
+var process = process || require('process');
 var rimraf = require('rimraf');
 module.exports = {
     usersList: "./users/users.json",
