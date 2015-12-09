@@ -1,10 +1,12 @@
 var http = require('http');
 var path = require('path');
 var helpers = require("./helpers.js");
-var EventEmitter = require("events").EventEmitter,
-    events = new EventEmitter();
+var fs = require('fs');
+var EventEmitter = require("events").EventEmitter;
+
 var server = http.createServer(function(req, res){
     var lookup = path.basename(decodeURI(req.url));
+    events = new EventEmitter();
     //console.log(lookup, req.method);
     var stringConfig = "";
     req.on('data', function (chunk) {
@@ -32,6 +34,7 @@ var server = http.createServer(function(req, res){
             console.error("Request With " + req.method + " method is not supported");
         }
     });
+
     res.writeHead(200, {'content-type': 'text/plain'});
     events.on("operationsFinished", function (data) {
         res.end(data.message);

@@ -1,7 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
-var maxBuffer = 500 * 1024;
+var maxBuffer = 600 * 1024;
 //var process = process || require('process');
 var rimraf = require('rimraf');
 module.exports = {
@@ -70,6 +70,7 @@ module.exports = {
             gitRepoName = config.gitClonePath.substring(gitRepoNameStartIndex + 1, gitRepoNameEndIndex),
             repoPathOnServer = path.resolve(__dirname + "/users/" + config.user + "/" + gitRepoName),
             that = this;
+
         exec("git pull " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
             if (error === null) {
                 console.log("git pull is done");
@@ -79,7 +80,7 @@ module.exports = {
                 });
             }else {
                 events.emit("operationsFinished", {
-                    "message": "the following error has occured: " + stdout + error
+                    "message": "error has occured on pull: " + stdout + error
                 });
             }
         });
@@ -132,7 +133,7 @@ module.exports = {
                         }
                     }else {
                         events.emit("operationsFinished", {
-                            "message": "the following error has occured: " + error
+                            "message": "error while executing your custom commands, please check if they work on your local repo, error info is this: " + error
                         });
                     }
                 });
