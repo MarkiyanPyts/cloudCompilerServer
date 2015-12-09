@@ -31,8 +31,7 @@ module.exports = {
     },
     cloneProcess: function(config, events) {
         var clonePath = path.normalize("users/" + config.user),
-            gitClonePathSplit = config.gitClonePath.split("@"),
-            gitClonePath = gitClonePathSplit[0] + ":" + config.gitPassword + "@" + gitClonePathSplit[1]; 
+            gitClonePath = config.gitClonePath;
         console.log("new Clone to: ", gitClonePath)
         exec("git clone " + gitClonePath, {cwd: clonePath, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
             if (error === null) {
