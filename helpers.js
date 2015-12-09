@@ -167,7 +167,7 @@ module.exports = {
         var userExists = this.checkIfUserExists(config.user);
         if(!userExists) {
             events.emit("operationsFinished", {
-                "message": "User with name you have in config file does not exist, run 'init' command to create one"
+                "message": "User with name you have in config file does not exist, run 'clcomp init' command to create one"
             });
         }else {
         //user Exists
