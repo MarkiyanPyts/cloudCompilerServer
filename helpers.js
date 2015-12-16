@@ -65,12 +65,8 @@ module.exports = {
         }
     },
     compileProcess: function(config, events) {
-        var gitRepoNameStartIndex = config.gitClonePath.lastIndexOf("/"),
-            gitRepoNameEndIndex = config.gitClonePath.lastIndexOf(".git"),
-            gitRepoName = config.gitClonePath.substring(gitRepoNameStartIndex + 1, gitRepoNameEndIndex),
-            repoPathOnServer = path.resolve(__dirname + "/users/" + config.user + "/" + gitRepoName),
+        var repoPathOnServer = path.resolve(__dirname + "/users/" + config.user + "/" + config.gitRepoName),
             that = this;
-
         exec("git pull " + config.gitPushRemote + " " + config.gitPushBranch, {cwd: repoPathOnServer, maxBuffer : maxBuffer}, function (error, stdout, stderr) {
             if (error === null) {
                 console.log("git pull is done");
